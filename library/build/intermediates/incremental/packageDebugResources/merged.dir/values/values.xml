@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="card">
+        <attr format="dimension" name="itemMarginTop"/>
+        <attr format="dimension" name="bottomMarginTop"/>
+        <attr format="dimension" name="yOffsetStep"/>
+        <attr format="float" name="widthHeightRate"/>
+    </declare-styleable>
+    <string name="app_name">library</string>
+</resources>
