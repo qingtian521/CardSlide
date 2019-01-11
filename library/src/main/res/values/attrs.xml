@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="card">
+        <!-- 卡片距离顶部的偏移量-->
         <attr name="itemMarginTop" format="dimension" />
+        <!--底部按钮与卡片的margin值-->
         <attr name="bottomMarginTop" format="dimension" />
+        <!--view叠加垂直偏移量的步长-->
         <attr name="yOffsetStep" format="dimension" />
         <attr name="widthHeightRate" format="float" />
     </declare-styleable>

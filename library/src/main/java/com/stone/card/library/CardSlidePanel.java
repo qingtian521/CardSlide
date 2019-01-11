@@ -44,6 +44,7 @@ public class CardSlidePanel extends ViewGroup {
     private int itemMarginTop = 10; // 卡片距离顶部的偏移量
     private int bottomMarginTop = 40; // 底部按钮与卡片的margin值
     private int yOffsetStep = 40; // view叠加垂直偏移量的步长
+
     private int mTouchSlop = 5; // 判定为滑动的阈值，单位是像素
 
     private static final int X_VEL_THRESHOLD = 800;
@@ -617,5 +618,13 @@ public class CardSlidePanel extends ViewGroup {
          * @param type  飞向哪一侧{@link #VANISH_TYPE_LEFT}或{@link #VANISH_TYPE_RIGHT}
          */
         public void onCardVanish(int index, int type);
+    }
+
+    /**
+     * 设置事件滑动的步长，当大于该值时，才可滑动
+     * @param touchSlop
+     */
+    public void setTouchSlop(int touchSlop) {
+        this.mTouchSlop = touchSlop;
     }
 }
