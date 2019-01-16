@@ -1,15 +1,18 @@
 package com.stone.card.library;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.support.annotation.NonNull;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,11 +50,11 @@ public class CardSlidePanel extends ViewGroup {
 
     private int mTouchSlop = 5; // 判定为滑动的阈值，单位是像素
 
-    private static final int X_VEL_THRESHOLD = 800;
-    private static final int X_DISTANCE_THRESHOLD = 300;
+    private static final int X_VEL_THRESHOLD = 800; //滑动速度，大于该值时消失
+    private static final int X_DISTANCE_THRESHOLD = 300; //滑动距离，大于该值时消失
 
-    public static final int VANISH_TYPE_LEFT = 0;
-    public static final int VANISH_TYPE_RIGHT = 1;
+    public static final int VANISH_TYPE_LEFT = 0;  //滑动状态 0左划
+    public static final int VANISH_TYPE_RIGHT = 1; //滑动状态 1右划
 
     private CardSwitchListener cardSwitchListener; // 回调接口
     private int isShowing = 0; // 当前正在显示的小项
@@ -84,8 +87,9 @@ public class CardSlidePanel extends ViewGroup {
         mDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_BOTTOM);
         a.recycle();
 
-        ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        ViewConfiguration configuration = ViewConfiguration.get(getContext()); //View的最小滑动距离
         mTouchSlop = configuration.getScaledTouchSlop();
+
         moveDetector = new GestureDetectorCompat(context,
                 new MoveDetector());
         moveDetector.setIsLongpressEnabled(false);
@@ -155,13 +159,16 @@ public class CardSlidePanel extends ViewGroup {
     private class DragHelperCallback extends ViewDragHelper.Callback {
 
         @Override
-        public void onViewPositionChanged(View changedView, int left, int top,
+        public void onViewPositionChanged(@NonNull View changedView, int left, int top,
                                           int dx, int dy) {
+            Log.i("DragHelperCallback",String.format("滑动中....left:%d,top:%d,X:%d,Y:%d",left,top,dx,dy));
+            //新增View滑动中，旋转View;
+            onViewRotation(changedView,left,top,dx,dy);
             onViewPosChanged((CardItemView) changedView);
         }
 
         @Override
-        public boolean tryCaptureView(View child, int pointerId) {
+        public boolean tryCaptureView(@NonNull View child, int pointerId) {
             // 如果数据List为空，或者子View不可见，则不予处理
 
             if (adapter == null || adapter.getCount() == 0
@@ -196,31 +203,43 @@ public class CardSlidePanel extends ViewGroup {
 
             // 4. 如果确定要滑动，就让touch事件交给自己消费
             if (shouldCapture) {
-                getParent().requestDisallowInterceptTouchEvent(shouldCapture);
+                getParent().requestDisallowInterceptTouchEvent(true);
             }
             return shouldCapture;
         }
 
         @Override
-        public int getViewHorizontalDragRange(View child) {
+        public int getViewHorizontalDragRange(@NonNull View child) {
             // 这个用来控制拖拽过程中松手后，自动滑行的速度
             return 256;
         }
 
         @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+        public void onViewReleased(@NonNull View releasedChild, float xvel, float yvel) {
             animToSide((CardItemView) releasedChild, (int) xvel, (int) yvel);
         }
 
         @Override
-        public int clampViewPositionHorizontal(View child, int left, int dx) {
+        public int clampViewPositionHorizontal(@NonNull View child, int left, int dx) {
             return left;
         }
 
         @Override
-        public int clampViewPositionVertical(View child, int top, int dy) {
+        public int clampViewPositionVertical(@NonNull View child, int top, int dy) {
             return top;
         }
+    }
+
+    /**
+     * View 在滑动中使其旋转
+     * @param changedView 旋转的View
+     * @param left 距离左边的距离
+     * @param top top 距离上边的距离
+     * @param dx dx x轴的变化量
+     * @param dy dy y轴的变化量
+     */
+    private void onViewRotation(View changedView, int left, int top, int dx, int dy) {
+        //旋转动画
     }
 
 
@@ -399,7 +418,7 @@ public class CardSlidePanel extends ViewGroup {
     /**
      * 点击按钮消失动画
      */
-    private void vanishOnBtnClick(int type) {
+    public void vanishOnBtnClick(int type) {
         View animateView = viewList.get(0);
         if (animateView.getVisibility() != View.VISIBLE || releasedViewList.contains(animateView)) {
             return;
